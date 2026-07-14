@@ -3,49 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>酸土豆大冒险·陀螺仪豪华版</title>
+    <title>酸土豆大冒险·终极稳定版</title>
     <style>
-        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: hidden; transition: background 0.3s; }
-        
-        /* 桌面图标 */
+        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: hidden; }
         .icon-container { position: relative; width: 80px; }
         .app-icon { width: 80px; height: 80px; border-radius: 22%; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .app-icon:active { transform: scale(0.9); }
         .app-name { color: white; text-align: center; margin-top: 10px; font-size: 12px; }
-        .badge { position: absolute; top: -5px; right: -5px; background-color: #FF3B30; color: white; font-size: 12px; font-weight: bold; min-width: 20px; height: 20px; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 0 4px; border: 2px solid #000; animation: shake 0.5s infinite alternate; }
+        
+        /* 红点呼吸灯 */
+        .badge { position: absolute; top: -5px; right: -5px; background-color: #FF3B30; color: white; font-size: 12px; font-weight: bold; min-width: 20px; height: 20px; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 0 4px; border: 2px solid #000; animation: shake 0.5s infinite alternate, breathe 1.5s infinite; }
         @keyframes shake { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+        @keyframes breathe { 0%{background:#FF3B30;} 50%{background:#FF9500;} 100%{background:#FFCC00;} }
 
-        /* App内部 */
-        #gameScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; overflow: hidden; color: #0f0; transition: background 0.3s, color 0.3s; }
+        #gameScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; overflow: hidden; color: #0f0; }
         #closeBtn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; z-index: 1000; cursor: pointer; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; line-height: 40px; text-align: center; }
-        
-        /* 下拉刷新 */
-        #refreshContainer { width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden; }
-        #pullToRefresh { height: 120px; display: flex; justify-content: center; align-items: center; color: #0f0; font-size: 18px; transform: translateY(-120px); transition: transform 0.3s, color 0.3s; }
+
+        /* 电量显示 */
+        #battery { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #0f0; }
+        #refreshContainer { width: 100%; height: 100%; overflow-y: auto; }
+        #pullToRefresh { height: 120px; display: flex; justify-content: center; align-items: center; color: #0f0; font-size: 18px; transform: translateY(-120px); transition: transform 0.3s; }
         #gameContent { padding: 20px; box-sizing: border-box; font-size: 14px; line-height: 1.6; }
-        
-        /* 掉落的物体 */
-        .falling-item { position: absolute; top: -100px; font-size: 30px; animation: fall linear forwards, spin 2s linear infinite; z-index: 9999; pointer-events: none; transition: font-size 0.3s; }
+
+        .falling-item { position: absolute; top: -100px; font-size: 30px; animation: fall linear forwards, spin 2s linear infinite; z-index: 9999; pointer-events: none; }
         @keyframes fall { to { top: 110vh; } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* 西红柿主题 */
+        /* 分身土豆 */
+        .clone-potato { position: absolute; font-size: 20px; animation: clone-fall 3s linear forwards; pointer-events: none; }
+        @keyframes clone-fall { to { top: 110vh; opacity: 0; } }
+
         .tomato-theme { background: #4a0000 !important; color: #ff6347 !important; }
         .tomato-theme #pullToRefresh { color: #ff6347 !important; }
         .tomato-theme #progress { background: #ff6347 !important; }
-        .tomato-theme .falling-item { filter: hue-rotate(120deg); }
 
-        /* 音量/截屏提示Toast */
         .volume-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 15px 30px; border-radius: 10px; font-size: 20px; font-weight: bold; z-index: 10001; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .potato-toast { background: rgba(0, 255, 0, 0.8); color: #000; }
-        .tomato-toast { background: rgba(255, 99, 71, 0.8); color: #000; }
-        .screen-toast { background: rgba(255, 255, 255, 0.9); color: #000; }
+        .potato-toast { background: rgba(0,255,0,0.8); color: #000; }
+        .tomato-toast { background: rgba(255,99,71,0.8); color: #000; }
+        .screen-toast { background: rgba(255,255,255,0.9); color: #000; }
 
-        /* 截屏闪光特效 */
         .flash-effect { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 10002; opacity: 0; pointer-events: none; }
-        @keyframes flash { 0% { opacity: 0.9; } 100% { opacity: 0; } }
+        @keyframes flash { 0%{opacity:0.9;} 100%{opacity:0;} }
 
-        /* 表情包弹窗 */
         #stickerModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10003; justify-content: center; align-items: center; flex-direction: column; }
         #stickerCanvas { background: white; border-radius: 10px; max-width: 90%; max-height: 60%; }
         .modal-btns { margin-top: 20px; display: flex; gap: 20px; }
@@ -53,390 +52,336 @@
         .save-btn { background: #0f0; color: #000; }
         .close-modal-btn { background: #666; color: white; }
 
-        /* 巨型/迷你模式 */
         .giant-mode .falling-item { font-size: 80px !important; }
         .mini-mode .falling-item { font-size: 10px !important; }
-
-        /* ====== 新增：电量耗尽特效 ====== */
         .dying-mode { background: #2a2a00 !important; color: #aa0 !important; animation: dying-shake 0.2s infinite; }
-        @keyframes dying-shake { 0% { transform: translate(2px, 1px); } 25% { transform: translate(-1px, -2px); } 50% { transform: translate(1px, 2px); } 75% { transform: translate(-2px, 1px); } 100% { transform: translate(2px, -1px); } }
-        .dying-toast { background: rgba(255, 170, 0, 0.9) !important; color: #000 !important; }
+        @keyframes dying-shake { 0%{transform:translate(2px,1px);} 25%{transform:translate(-1px,-2px);} 50%{transform:translate(1px,2px);} 75%{transform:translate(-2px,1px);} 100%{transform:translate(2px,-1px);} }
 
-        /* ====== 新增：陀螺仪偏移 ====== */
-        .gyro-layer { transition: transform 0.1s ease-out; }
-
-        /* 访问计数器 */
-        #counter { text-align: center; font-size: 11px; color: #666; margin-top: 10px; }
+        /* 触屏吐槽气泡 */
+        .tap-bubble { position: absolute; background: rgba(255,255,255,0.9); color: #000; padding: 8px 12px; border-radius: 16px; font-size: 14px; z-index: 10004; animation: bubble-fade 1.5s forwards; pointer-events: none; }
+        @keyframes bubble-fade { 0%{opacity:1; transform: translateY(0);} 100%{opacity:0; transform: translateY(-30px);} }
     </style>
 </head>
 <body>
 
-    <!-- 桌面图标 -->
-    <div class="icon-container" onclick="openApp()">
-        <svg class="app-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#4158D0;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#FFCC70;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <rect width="100" height="100" rx="22" fill="url(#grad)"/>
-            <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-size="55">🥔</text>
-        </svg>
-        <div class="badge" id="badge">99+</div>
-        <div class="app-name">酸土豆</div>
+<div class="icon-container" onclick="openApp()">
+    <svg class="app-icon" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#4158D0"/><stop offset="100%" stop-color="#FFCC70"/></linearGradient></defs><rect width="100" height="100" rx="22" fill="url(#g)"/><text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" font-size="55">🥔</text></svg>
+    <div class="badge" id="badge">99+</div>
+    <div class="app-name">酸土豆</div>
+</div>
+
+<div class="volume-toast" id="volumeToast"></div>
+<div class="flash-effect" id="flashEffect"></div>
+<div id="battery"></div>
+
+<div id="stickerModal">
+    <canvas id="stickerCanvas" width="400" height="400"></canvas>
+    <div class="modal-btns">
+        <button class="modal-btn save-btn" onclick="saveSticker()">保存到相册</button>
+        <button class="modal-btn close-modal-btn" onclick="closeStickerModal()">关闭</button>
     </div>
+</div>
 
-    <!-- 各类提示Toast -->
-    <div class="volume-toast" id="volumeToast"></div>
-    <div class="flash-effect" id="flashEffect"></div>
-
-    <!-- 表情包弹窗 -->
-    <div id="stickerModal">
-        <canvas id="stickerCanvas" width="400" height="400"></canvas>
-        <div class="modal-btns">
-            <button class="modal-btn save-btn" onclick="saveSticker()">保存到相册</button>
-            <button class="modal-btn close-modal-btn" onclick="closeStickerModal()">关闭</button>
-        </div>
-        <p style="color:white;font-size:12px;margin-top:10px;">*长按图片也可保存哦~</p>
-    </div>
-
-    <!-- App内部 -->
-    <div id="gameScreen" class="gyro-layer">
-        <div id="closeBtn" onclick="closeApp()">×</div>
-        <div id="refreshContainer">
-            <div id="pullToRefresh">🥔 酸度加载中... 正在召唤土豆雨！</div>
-            <div id="gameContent">
-                <h2 style="text-align:center;" id="title">🥔 酸土豆 vs 🍅 Rap西红柿 🍅</h2>
-                <div id="counter"></div>
-                <hr>
-                <div id="rapLog">
-                    <p>🥔: 哟哟，切克闹，我是酸到掉牙的土豆佬！</p>
-                    <p>🍅: Yo! 我是满脸通红的西红柿，把你炒爆！</p>
-                    <p>🌙: 我在上面看戏，谁赢了我就吃谁！</p>
-                </div>
-                <div id="progressBar" style="background:#333;height:20px;border-radius:10px;margin-top:20px;">
-                    <div id="progress" style="width:10%;height:100%;background:#0f0;border-radius:10px;transition:width 0.5s;"></div>
-                </div>
-                <p style="text-align:center;font-size:12px;">(下拉☔ | 摇一摇📳 | 音量+/-🔊 | 锁屏截屏📸 | <b>晃手机🌀土豆飞</b>)</p>
-                <p style="text-align:center;font-size:10px;color:#666;" id="batteryHint"></p>
+<div id="gameScreen">
+    <div id="closeBtn" onclick="closeApp()">×</div>
+    <div id="refreshContainer">
+        <div id="pullToRefresh">🥔 酸度加载中... 正在召唤土豆雨！</div>
+        <div id="gameContent">
+            <h2 style="text-align:center" id="title">🥔 酸土豆 vs 🍅 Rap西红柿 🍅</h2>
+            <div id="counter"></div>
+            <hr>
+            <div id="rapLog">
+                <p>🥔: 哟哟，切克闹，我是酸到掉牙的土豆佬！</p>
+                <p>🍅: Yo! 我是满脸通红的西红柿，把你炒爆！</p>
+                <p>🌙: 我在上面看戏，谁赢了我就吃谁！</p>
             </div>
+            <div id="progressBar" style="background:#333;height:20px;border-radius:10px;margin-top:20px"><div id="progress" style="width:10%;height:100%;background:#0f0;border-radius:10px;transition:width 0.5s"></div></div>
+            <p style="text-align:center;font-size:12px;color:#666">✅ 已降级：无陀螺仪，稳跑vivo | 点土豆/屏幕有惊喜</p>
         </div>
     </div>
+</div>
 
-    <script>
-        // 全局变量
-        const gameScreen = document.getElementById('gameScreen');
-        const pullToRefresh = document.getElementById('pullToRefresh');
-        const rapLog = document.getElementById('rapLog');
-        const progress = document.getElementById('progress');
-        const volumeToast = document.getElementById('volumeToast');
-        const flashEffect = document.getElementById('flashEffect');
-        const stickerModal = document.getElementById('stickerModal');
-        const stickerCanvas = document.getElementById('stickerCanvas');
-        const ctx = stickerCanvas.getContext('2d');
-        const title = document.getElementById('title');
-        const counterEl = document.getElementById('counter');
-        const badgeEl = document.getElementById('badge');
-        const batteryHint = document.getElementById('batteryHint');
-        let progressWidth = 10;
-        let isTomatoMode = false;
-        let potatoSize = 30;
-        let tomatoSize = 30;
-        let rapInterval = 5000;
-        let volUpCount = 0;
-        let volDownCount = 0;
-        let screenShotCount = 0;
-        let audioContext, gainNode;
-        let openTime = 0; // 打开时间戳，用于"电量耗尽"伪特效
-        let victimCount = 0; // 被折磨人数
+<script>
+    // 全局变量
+    const gameScreen = document.getElementById('gameScreen');
+    const pullToRefresh = document.getElementById('pullToRefresh');
+    const rapLog = document.getElementById('rapLog');
+    const progress = document.getElementById('progress');
+    const volumeToast = document.getElementById('volumeToast');
+    const flashEffect = document.getElementById('flashEffect');
+    const stickerCanvas = document.getElementById('stickerCanvas');
+    const ctx = stickerCanvas.getContext('2d');
+    const title = document.getElementById('title');
+    const badge = document.getElementById('badge');
+    const batteryEl = document.getElementById('battery');
+    let progressWidth = 10;
+    let isTomatoMode = false;
+    let potatoSize = 30;
+    let tomatoSize = 30;
+    let rapInterval = 5000;
+    let volUpCount = 0;
+    let volDownCount = 0;
+    let screenShotCount = 0;
+    let tapCount = 0; // 连续点击计数
+    let audioContext; // 音频上下文
+    let victimCount = 0; // 折磨人数
 
-        // ====== 访问计数器（localStorage）======
-        function initCounter() {
-            victimCount = parseInt(localStorage.getItem('potato_victims') || '0');
-            victimCount++;
-            localStorage.setItem('potato_victims', victimCount);
-            counterEl.innerHTML = `🥔 已有 <b>${victimCount}</b> 人被这只土豆折磨过`;
-            // 红点也跟着涨
-            badgeEl.innerHTML = (victimCount > 99 ? '99+' : victimCount) + '+';
-        }
+    // 初始化音频
+    function initAudio() {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) {}
+    }
 
-        // ====== 升级模块1：Web Audio 合成"酸~"尖叫 ======
-        function scream() {
-            try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                const g = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(300, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-                osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.3);
-                g.gain.setValueAtTime(0.3, ctx.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
-                osc.connect(g);
-                g.connect(ctx.destination);
-                osc.start();
-                osc.stop(ctx.currentTime + 0.4);
-            } catch(e) {}
-        }
+    // 播放合成音效
+    function playTone(freq, duration) {
+        if (!audioContext) return;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+        osc.stop(audioContext.currentTime + duration);
+    }
 
-        // ====== 升级模块2：伪电量耗尽 ======
-        function checkBattery() {
-            // 用 navigator.getBattery() 真电量（如果浏览器支持）
-            if (navigator.getBattery) {
-                navigator.getBattery().then(bat => {
+    // 访问计数器
+    function initCounter() {
+        victimCount = parseInt(localStorage.getItem('potato_victims') || '0') + 1;
+        localStorage.setItem('potato_victims', victimCount);
+        document.getElementById('counter').innerHTML = `🥔 已有 <b>${victimCount}</b> 人被折磨`;
+        badge.innerText = (victimCount > 99 ? '99+' : victimCount) + '+';
+    }
+
+    // 电量监控
+    function initBattery() {
+        if (navigator.getBattery) {
+            navigator.getBattery().then(bat => {
+                const update = () => {
+                    batteryEl.innerText = `🔋 电量：${Math.round(bat.level * 100)}%`;
                     if (bat.level < 0.2) {
                         gameScreen.classList.add('dying-mode');
-                        showToast('🥔 酸度耗尽警告！我要酸死了！！', 'dying');
-                        batteryHint.innerHTML = '⚠️ 土豆酸度：' + Math.round(bat.level * 100) + '%（即将碳化）';
+                        showToast('🥔 酸度耗尽！我要碳化啦！', 'screen');
                     } else {
-                        batteryHint.innerHTML = '🥔 酸度：' + Math.round(bat.level * 100) + '%';
+                        gameScreen.classList.remove('dying-mode');
                     }
-                    bat.addEventListener('levelchange', () => {
-                        if (bat.level < 0.2) {
-                            gameScreen.classList.add('dying-mode');
-                            showToast('🥔 酸度耗尽警告！我要酸死了！！', 'dying');
-                        }
-                    });
-                });
-            } else {
-                // 降级：用打开时长模拟
-                const elapsed = Date.now() - openTime;
-                if (elapsed > 60000) {
-                    gameScreen.classList.add('dying-mode');
-                    showToast('🥔 打开太久了我酸死了！！', 'dying');
-                    batteryHint.innerHTML = '⚠️ 土豆已连续酸了 ' + Math.round(elapsed/1000) + ' 秒';
+                };
+                update();
+                bat.addEventListener('levelchange', update);
+            });
+        }
+    }
+
+    // 触屏吐槽
+    document.addEventListener('click', (e) => {
+        if (gameScreen.style.display !== 'block') return;
+        const bubbles = ['别戳我！酸！', '你手劲好大！', '再点我报警了！', '酸度+10%！', '我要变异了！'];
+        const bubble = document.createElement('div');
+        bubble.className = 'tap-bubble';
+        bubble.innerText = bubbles[Math.floor(Math.random() * bubbles.length)];
+        bubble.style.left = `${e.clientX}px`;
+        bubble.style.top = `${e.clientY}px`;
+        document.body.appendChild(bubble);
+        setTimeout(() => bubble.remove(), 1500);
+        playTone(600 + Math.random() * 400, 0.1);
+    });
+
+    // 连续点击土豆彩蛋
+    document.querySelector('.app-icon').addEventListener('click', () => {
+        if (gameScreen.style.display === 'block') return;
+        tapCount++;
+        if (tapCount >= 5) {
+            // 分身术
+            for (let i = 0; i < 20; i++) {
+                const clone = document.createElement('div');
+                clone.className = 'clone-potato';
+                clone.innerText = '🥔';
+                clone.style.left = `${Math.random() * 100}vw`;
+                clone.style.animationDuration = `${Math.random() * 2 + 1}s`;
+                document.body.appendChild(clone);
+                setTimeout(() => clone.remove(), 3000);
+            }
+            showToast('🥔 土豆分身术！满屏都是我！', 'potato');
+            tapCount = 0;
+        }
+        setTimeout(() => tapCount = 0, 1000); // 1秒内没点够5次重置
+    });
+
+    // 下拉刷新
+    let startY = 0, isPulling = false;
+    document.getElementById('refreshContainer').addEventListener('touchstart', e => {
+        if (document.getElementById('refreshContainer').scrollTop === 0) { startY = e.touches[0].pageY; isPulling = true; }
+    });
+    document.getElementById('refreshContainer').addEventListener('touchmove', e => {
+        if (!isPulling) return;
+        const diff = e.touches[0].pageY - startY;
+        if (diff > 0) {
+            pullToRefresh.style.transform = `translateY(${diff - 120}px)`;
+            pullToRefresh.innerHTML = diff > 150 ? '🍅 松手！土豆要下雨了！！' : '🥔 酸度加载中...';
+        }
+    });
+    document.getElementById('refreshContainer').EventListener('touchend', e => {
+        if (!isPulling) return;
+        pullToRefresh.style.transform = 'translateY(-120px)';
+        if (e.changedTouches[0].pageY - startY > 150) {
+            dropItems();
+            generateMultipleStickers(); // 批量表情包
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+        }
+        isPulling = false;
+    });
+
+    // 土豆雨
+    function dropItems() {
+        const items = ['🥔','🍅','🌙','💧','🎵','💃'];
+        for (let i = 0; i < 25; i++) {
+            const item = document.createElement('div');
+            item.className = 'falling-item';
+            item.innerText = items[Math.floor(Math.random() * items.length)];
+            item.style.left = `${Math.random() * 100}vw`;
+            item.style.animationDuration = `${Math.random() * 2 + 1}s`;
+            if (item.innerText.includes('🥔')) item.style.fontSize = `${potatoSize}px`;
+            if (item.innerText.includes('🍅')) item.style.fontSize = `${tomatoSize}px`;
+            gameScreen.appendChild(item);
+            setTimeout(() => item.remove(), 3000);
+        }
+        const p = document.createElement('p');
+        p.innerHTML = ['🥔: 我的酸度，让你牙齿发抖！', '🍅: 我富含茄红素，把你红透！', '🥔: 我要把你炸成薯条！', '🍅: 我要把你炖成土豆牛腩！', '🌙: 别吵了，我要开始吃人了！'][Math.floor(Math.random() * 5)];
+        rapLog.prepend(p);
+        if (rapLog.children.length > 8) rapLog.lastChild.remove();
+        progressWidth = (progressWidth + 10) % 110;
+        progress.style.width = `${progressWidth}%`;
+    }
+
+    // 批量表情包
+    function generateMultipleStickers() {
+        const texts = ['酸到掉牙！🥔', '我被戳疼了！😱', '西红柿急眼了！🍅', '月亮要吃人！🌙', '这Rap太辣了！🔥', '酸度超标！💧', '土豆永不为奴！✊', '分身术发动！🥔'];
+        for (let i = 0; i < 3; i++) {
+            setTimeout(() => {
+                stickerCanvas.width = 400;
+                stickerCanvas.height = 400;
+                ctx.fillStyle = isTomatoMode ? '#ff6347' : '#f5deb3';
+                ctx.fillRect(0, 0, 400, 400);
+                ctx.font = '150px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(isTomatoMode ? '🍅' : '🥔', 200, 180);
+                ctx.font = 'bold 24px Arial';
+                ctx.fillStyle = '#000';
+                ctx.fillText(texts[Math.floor(Math.random() * texts.length)], 200, 320);
+                const stickers = ['💧','🎵','🌙','✨','🔥','🥔'];
+                for (let j = 0; j < 5; j++) {
+                    ctx.font = '30px Arial';
+                    ctx.fillText(stickers[Math.floor(Math.random() * stickers.length)], Math.random() * 350 + 25, Math.random() * 100 + 50);
                 }
-            }
+                ctx.font = '12px Arial';
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fillText(`第${i+1}张 | 受害者：${victimCount}`, 200, 380);
+            }, i * 300);
         }
+        showToast('🎁 批量生成3张表情包！', 'screen');
+    }
 
-        // ====== 升级模块3：陀螺仪控土豆飞行 ======
-        let gyroAlpha = 0, gyroBeta = 0, gyroGamma = 0;
-        function handleGyro(event) {
-            // gamma: 左右倾斜（-90~90），beta: 前后倾斜
-            gyroGamma = event.gamma || 0; // 左右
-            gyroBeta = event.beta || 0;   // 前后
-            // 把陀螺仪映射到 falling-item 的水平偏移
-            // 同时让整个 gameScreen 微偏，模拟"晃动感"
-            const layer = document.querySelector('.gyro-layer');
-            layer.style.transform = `translate(${gyroGamma * 0.3}px, ${gyroBeta * 0.2}px)`;
-        }
-
-        function initGyro() {
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                // iOS 13+
-                DeviceOrientationEvent.requestPermission().then(state => {
-                    if (state === 'granted') window.addEventListener('deviceorientation', handleGyro);
-                }).catch(()=>{});
-            } else {
-                window.addEventListener('deviceorientation', handleGyro);
-            }
-        }
-
-        // 掉落时给土豆加水平初速度（受陀螺仪影响）
-        function getGyroOffset() {
-            return gyroGamma * 2; // 左右倾斜越大，水平飞越远
-        }
-
-        // ====== 表情包随机文案库 ======
-        const stickerTexts = [
-            "酸到掉牙！🥔", "我被截屏了！😱", "西红柿急眼了！🍅",
-            "月亮要吃人！🌙", "这Rap太辣了！🔥", "酸度超标警告！💧",
-            "土豆永不为奴！✊", "西红柿必须死！⚔️", "陀螺仪失控了🌀",
-            "电量耗尽…碳化中💀"
-        ];
-
-        // ====== 原有：电源键截屏 ======
-        document.addEventListener('visibilitychange', () => {
-            if (gameScreen.style.display === 'block' && !document.hidden) {
-                triggerScreenShot();
-            }
-        });
-
-        function triggerScreenShot() {
-            flashEffect.style.animation = 'flash 0.3s';
-            setTimeout(() => flashEffect.style.animation = '', 300);
-            if (navigator.vibrate) navigator.vibrate([50, 50, 50]);
-            showToast('📸 截屏成功！生成土豆表情包~', 'screen');
-            generateSticker();
-            screenShotCount++;
-            if (screenShotCount >= 3) {
-                stickerCanvas.width = 600; stickerCanvas.height = 600;
-                showToast('🌋 巨型表情包模式！', 'potato');
-                screenShotCount = 0;
-            }
-            stickerModal.style.display = 'flex';
-        }
-
-        function generateSticker() {
-            stickerCanvas.width = 400; stickerCanvas.height = 400;
-            ctx.fillStyle = isTomatoMode ? '#ff6347' : '#f5deb3';
-            ctx.fillRect(0, 0, 400, 400);
-            ctx.font = '150px Arial';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText(isTomatoMode ? '🍅' : '🥔', 200, 180);
-            const text = stickerTexts[Math.floor(Math.random() * stickerTexts.length)];
-            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#000';
-            ctx.fillText(text, 200, 320);
-            const stickers = ['💧','🎵','🌙','✨','🔥','🌀'];
-            for (let i = 0; i < 5; i++) {
-                ctx.font = '30px Arial';
-                ctx.fillText(stickers[Math.floor(Math.random()*stickers.length)], Math.random()*350+25, Math.random()*100+50);
-            }
-            ctx.font = '12px Arial'; ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.fillText(`已有${victimCount}人被折磨 | 酸土豆出品`, 200, 380);
-        }
-
-        function saveSticker() {
-            const link = document.createElement('a');
-            link.download = `酸土豆_${Date.now()}.png`;
-            link.href = stickerCanvas.toDataURL('image/png');
-            link.click();
-            showToast('💾 表情包已保存！', 'screen');
-        }
-
-        function closeStickerModal() { stickerModal.style.display = 'none'; }
-
-        // ====== 原有：音量键 ======
-        function initVolumeHack() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                gainNode = audioContext.createGain();
-                const osc = audioContext.createOscillator();
-                osc.connect(gainNode); gainNode.connect(audioContext.destination);
-                osc.start(); gainNode.gain.value = 0;
-            } catch(e){}
-            document.addEventListener('keydown', (e) => {
-                if (e.key==='+'||e.key==='ArrowUp') handleVolUp();
-                if (e.key==='-'||e.key==='ArrowDown') handleVolDown();
-            });
-        }
-
-        function handleVolUp() {
-            volUpCount++; volDownCount=0;
-            showToast('🥔 体积+10%！酸度爆表！', 'potato');
-            potatoSize = Math.min(potatoSize+3, 80);
-            updateItemSize('🥔', potatoSize);
-            if(navigator.vibrate) navigator.vibrate([100,50,100]);
-            if(volUpCount>=5){ gameScreen.classList.add('giant-mode'); showToast('🌋 巨型土豆核爆！','potato'); volUpCount=0; setTimeout(()=>gameScreen.classList.remove('giant-mode'),3000); }
-            rapInterval = Math.min(rapInterval+500, 8000); resetRapTimer();
-        }
-
-        function handleVolDown() {
-            volDownCount++; volUpCount=0;
-            showToast('🍅 体积-10%！急眼了！', 'tomato');
-            tomatoSize = Math.max(tomatoSize-3, 10);
-            updateItemSize('🍅', tomatoSize);
-            if(navigator.vibrate) navigator.vibrate(50);
-            if(volDownCount>=5){ gameScreen.classList.add('mini-mode'); showToast('🐜 迷你蚁群！','tomato'); volDownCount=0; setTimeout(()=>gameScreen.classList.remove('mini-mode'),3000); }
-            rapInterval = Math.max(rapInterval-500, 1000); resetRapTimer();
-        }
-
-        function updateItemSize(emoji, size) {
-            document.querySelectorAll('.falling-item').forEach(item => {
-                if(item.innerText.includes(emoji)) item.style.fontSize = size+'px';
-            });
-        }
-
-        function showToast(text, type) {
-            volumeToast.innerText = text;
-            volumeToast.className = `volume-toast ${type}-toast`;
-            volumeToast.style.opacity = 1;
-            setTimeout(()=>volumeToast.style.opacity=0, 1000);
-        }
-
-        function resetRapTimer() {
-            clearInterval(window.rapTimer);
-            window.rapTimer = setInterval(dropItems, rapInterval);
-        }
-
-        // ====== 摇一摇 ======
-        let lastShakeTime = 0;
-        function handleShake(event) {
-            const a = event.accelerationIncludingGravity;
-            const i = Math.sqrt((a.x||0)**2+(a.y||0)**2+(a.z||0)**2);
-            if(i>15 && Date.now()-lastShakeTime>1000) { lastShakeTime=Date.now(); toggleTheme(); }
-        }
-        function toggleTheme() {
+    // 摇一摇
+    let lastShake = 0;
+    function handleShake(e) {
+        const a = e.accelerationIncludingGravity;
+        const i = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
+        if (i > 15 && Date.now() - lastShake > 1000) {
+            lastShake = Date.now();
             isTomatoMode = !isTomatoMode;
             gameScreen.classList.toggle('tomato-theme', isTomatoMode);
             title.innerHTML = isTomatoMode ? '🍅 西红柿暴走模式 🍅' : '🥔 酸土豆 vs 🍅 Rap西红柿 🍅';
-            if(navigator.vibrate) navigator.vibrate(isTomatoMode ? [200,100,200] : 100);
+            if (navigator.vibrate) navigator.vibrate(isTomatoMode ? [200,100,200] : 100);
+            generateMultipleStickers(); // 摇一摇也出表情包
         }
+    }
 
-        // ====== 下拉刷新 ======
-        let startY=0, isPulling=false;
-        refreshContainer.addEventListener('touchstart', e=>{ if(refreshContainer.scrollTop===0){startY=e.touches[0].pageY;isPulling=true;} });
-        refreshContainer.addEventListener('touchmove', e=>{
-            if(!isPulling)return;
-            const d=e.touches[0].pageY-startY;
-            if(d>0){ pullToRefresh.style.transform=`translateY(${d-120}px)`; pullToRefresh.innerHTML=d>150?'🍅 松手！土豆要下雨了！！':'🥔 酸度加载中...'; }
-        });
-        refreshContainer.addEventListener('touchend', e=>{
-            if(!isPulling)return;
-            pullToRefresh.style.transform='translateY(-120px)';
-            if(e.changedTouches[0].pageY-startY>150){ dropItems(); if(navigator.vibrate) navigator.vibrate([100,50,100]); }
-            isPulling=false;
-        });
+    // 锁屏截屏
+    document.addEventListener('visibilitychange', () => {
+        if (gameScreen.style.display === 'block' && !document.hidden) {
+            flashEffect.style.animation = 'flash 0.3s';
+            setTimeout(() => flashEffect.style.animation = '', 300);
+            if (navigator.vibrate) navigator.vibrate([50,50,50]);
+            showToast('📸 截屏成功！生成表情包~', 'screen');
+            generateMultipleStickers();
+            screenShotCount++;
+        }
+    });
 
-        // ====== 土豆雨（升级：受陀螺仪影响水平速度）======
-        function dropItems() {
-            const items = ['🥔','🍅','🌙','💧','🎵','💃','🌀'];
-            const raps = [
-                "🥔: 我的酸度，让你牙齿发抖！","🍅: 我富含茄红素，把你红透！",
-                "🥔: 我要把你炸成薯条！","🍅: 我要把你炖成土豆牛腩！",
-                "🌙: 别吵了，我要开始吃人了！","🌀: 陀螺仪把我也卷进来了！"
-            ];
-            const gyroOff = getGyroOffset();
-            for(let i=0;i<25;i++){
-                const item=document.createElement('div');
-                item.className='falling-item';
-                item.innerText=items[Math.floor(Math.random()*items.length)];
-                item.style.left = (Math.random()*100 + gyroOff*0.5) + 'vw';
-                item.style.animationDuration = (Math.random()*2+1)+'s';
-                if(item.innerText.includes('🥔')) item.style.fontSize=potatoSize+'px';
-                if(item.innerText.includes('🍅')) item.style.fontSize=tomatoSize+'px';
-                gameScreen.appendChild(item);
-                setTimeout(()=>item.remove(), 3000);
+//保存表情包
+函数saveSticker(){
+Const link=document.createElement('a')；
+link.download='酸土豆_${Date.now()}.png'；
+link.href=stickerCanvas.toDataURL('image.png')；
+link.click()；
+showtoast('💾表情包已保存！'，'screen')；
+    }
+
+函数closeStickerModal(){文件。getElementById('stickerModal')。风格。显示='无'；}
+
+//音量键（安卓铬有效）
+函数initVolumeHack(){
+尝试{
+AudioContext=new(window.AudioContext||window.webkitAudioContext)()；
+Const gain=audioContext.createGain()；
+Const osc=audioContext.createOscillator()；
+osc.connect(增益)；
+gain.connect(audioContext.destination)；
+osc.start()；
+gain.gain.value=0；
+}渔获物(e){}
+document.addEventListener('keydown'，e=>{
+if(e.key==='+'||e.key==='箭头向上'){
+volUpCount++；
+showToast('🥔 体积+10%！'，'马铃薯')；
+PotatoSize=Math.min(PotatoSize+3，80)；
+Playtone(800，0.1)；
             }
-            const p=document.createElement('p');
-            p.innerHTML=raps[Math.floor(Math.random()*raps.length)];
-            rapLog.prepend(p);
-            if(rapLog.children.length>8) rapLog.lastChild.remove();
-            progressWidth=(progressWidth+10)%110;
-            progress.style.width=progressWidth+'%';
-        }
+if(e.key==='-'||e.key==='arrowDown'){
+volDownCount++；
+showToast('🍅 体积-10%！'，'番茄')；
+番茄大小=math.max(番茄大小-3，10)；
+playTone(400，0.1)；
+}
+        });
+    }
 
-        // ====== App开关 ======
-        function openApp() {
-            gameScreen.style.display='block';
-            openTime = Date.now();
-            if(navigator.vibrate) navigator.vibrate(5);
-            // 开机尖叫
-            scream();
-            // 计数器
-            initCounter();
-            // 音量劫持
-            initVolumeHack();
-            // 摇一摇
-            if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){
-                DeviceMotionEvent.requestPermission().then(s=>{ if(s==='granted') window.addEventListener('devicemotion',handleShake); });
-            } else { window.addEventListener('devicemotion',handleShake); }
-            // 陀螺仪
-            initGyro();
-            // 伪电量检测
-            checkBattery();
-            // Rap
-            window.rapTimer = setInterval(dropItems, rapInterval);
-        }
+//提示吐司面包
+函数showToast(文本，类型){
+volumeToast.innerText=text；
+volumeToast。className='volume-toast${type}-toast'；
+volumeToast.style.opacity=1；
+setTimeout(()=>volumeToast.style.opacity=0，1000)；
+    }
 
-        function closeApp() {
-            gameScreen.style.display='none';
-            clearInterval(window.rapTimer);
-            window.removeEventListener('devicemotion',handleShake);
-            if(audioContext) audioContext.close();
-            gameScreen.classList.remove('dying-mode');
+//应用程序开关
+函数OpenApp(){
+gameScreen.style.display='block'；
+initAudio()；
+initCounter()；
+initBattery()；
+        // 摇一摇权限
+if(typeof DeviceMotionEvent！=='未定义'&&typeof DeviceMotionEvent.RequestPermission==='function'){
+DeviceMotionEvent.RequestPermission()。然后(s=>s===='植入的'&&window.addEventListener('Devicmotion'，handleShake))；
+}else{
+window.addEventListener('Devicemotion'，handleShake)；
         }
-    </script>
+initVolumeHack()；
+window.rapTimer=setInterval(dropItems，rapInterval)；
+Playtone(300，0.4)；//打开机尖叫
+    }
+
+函数closeApp(){
+gameScreen.style.display='none'；
+clearInterval(window.rapTimer)；
+window.removeEventListener('Devicemotion'，handleShake)；
+if(AudioContext)audioContext.close()；
+gameScreen.classList.remove('死亡模式')；
+    }
+</script>
 </body>
 </html>
