@@ -1,39 +1,39 @@
-<!DOCTYPE html>
+<！DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>酸土豆大冒险·终极稳定版</title>
-    <style>
-        body { background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; overflow: hidden; }
-        .icon-container { position: relative; width: 80px; }
-        .app-icon { width: 80px; height: 80px; border-radius: 22%; cursor: pointer; transition: transform 0.1s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .app-icon:active { transform: scale(0.9); }
-        .app-name { color: white; text-align: center; margin-top: 10px; font-size: 12px; }
+<meta charset="UTF-8">
+<元名称=“视口”内容=“宽度=设备宽度，初始比例=1.0，用户可缩放=否”>
+<title>酸土豆大冒险·终极稳定版</title>
+<style>
+正文{background：#000；显示：弯曲；对齐内容：居中；对齐项目：居中；高度：100vh；边距：0；字体系列：-苹果系统，BlinkMacSystemFont，"Segoe UI"，无衬线；溢出：隐藏；}
+.icon-容器{位置：相对；宽度：80px；}
+.app-icon{宽度：80px；高度：80px；边框半径：22%；坐标：指针；过渡：变化0.1s；框阴影：010px30px rgba(0，0，0，0.5)；}
+.app-icon：活动{变换：比例(0.9)；}
+.app-name{color：白色；文字对齐：居中；上边距：10px；字体大小：12px；}
         
-        /* 红点呼吸灯 */
-        .badge { position: absolute; top: -5px; right: -5px; background-color: #FF3B30; color: white; font-size: 12px; font-weight: bold; min-width: 20px; height: 20px; border-radius: 10px; display: flex; justify-content: center; align-items: center; padding: 0 4px; border: 2px solid #000; animation: shake 0.5s infinite alternate, breathe 1.5s infinite; }
-        @keyframes shake { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
-        @keyframes breathe { 0%{background:#FF3B30;} 50%{background:#FF9500;} 100%{background:#FFCC00;} }
+/* 红点呼吸灯 */
+.badge{position:absolute；顶部：-5px；右侧：-5px；背景色：#FF3B30；颜色：白色；字号：12px；字粗细：粗体；最小宽度：20px；高度：20px；边框半径：10px；显示：弯曲；对齐内容：居中；对齐项目：居中；填充：04px；边框：2px实心#000；动画：摇动0.5s无限交替，呼吸1.5s无限；}
+@keyframes 摇动{从{transform:rotate(-5deg)；}到{transform:rotate(5deg)；}}
+@keyframes呼吸{0%{background：#FF3B30；}50%{background：#FF9500；}100%{background：#FFCC00；}}
 
-        #gameScreen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; z-index: 999; overflow: hidden; color: #0f0; }
-        #closeBtn { position: absolute; top: 20px; right: 20px; color: white; font-size: 30px; z-index: 1000; cursor: pointer; background: rgba(0,0,0,0.5); border-radius: 50%; width: 40px; height: 40px; line-height: 40px; text-align: center; }
+#GameScreen{显示：无；位置：固定；顶部：0；左侧：0；宽度：100%；高度：100%；背景：#111；z索引：999；溢出：隐藏；颜色：#0f0；}
+#closeBtn{position：绝对；顶部：20px；右侧：20px；颜色：白色；字体大小：30px；z索引：1000；光标：指针；背景：rgba(0,0,0,0.5);边框半径：50%；宽度：40px；高度：40px；行高：40px；文本对齐：居中；}
 
-        /* 电量显示 */
-        #battery { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #0f0; }
-        #refreshContainer { width: 100%; height: 100%; overflow-y: auto; }
-        #pullToRefresh { height: 120px; display: flex; justify-content: center; align-items: center; color: #0f0; font-size: 18px; transform: translateY(-120px); transition: transform 0.3s; }
-        #gameContent { padding: 20px; box-sizing: border-box; font-size: 14px; line-height: 1.6; }
+/* 电量显示 */
+#battery{position:absolute；top:20px；left:50%；translateX(-50%)；font-size:12px；color：#0f0；}
+#refreshContainer{width:100%；height:100%；overflow-y:auto；}
+#pullToRefresh{height:120px；显示：弯曲；对齐内容：居中；对齐项目：居中；颜色：#0f0；字体大小：18px；转换：translateY(-120px)；转换：转换0.3s；}
+#gameContent{padding:20px；框大小：border-box；字体大小：14px；行高：1.6；}
 
-        .falling-item { position: absolute; top: -100px; font-size: 30px; animation: fall linear forwards, spin 2s linear infinite; z-index: 9999; pointer-events: none; }
-        @keyframes fall { to { top: 110vh; } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.坠落项目{position:absolute；top：-100px；font-size:30px；动画：直线向前坠落，旋转2s直线无限；z索引：9999；指针事件：无；}
+@keyframes fall{to{top:110vh；}}
+@keyframes spin{从{transform:rotate(0deg)；}到{transform:rotate(360deg)；}}
 
-        /* 分身土豆 */
-        .clone-potato { position: absolute; font-size: 20px; animation: clone-fall 3s linear forwards; pointer-events: none; }
-        @keyframes clone-fall { to { top: 110vh; opacity: 0; } }
+/* 分身土豆 */
+。克隆土豆{position:absolute；font-size:20px；动画：clone-fall3s线性向前；指针事件：无；}
+@keyframes clone-fall{to{top:110vh；不透明度：0；}}
 
-        .tomato-theme { background: #4a0000 !important; color: #ff6347 !important; }
+.番茄主题{background：#4a0000！important；color：#ff6347！important；}
         .tomato-theme #pullToRefresh { color: #ff6347 !important; }
         .tomato-theme #progress { background: #ff6347 !important; }
 
